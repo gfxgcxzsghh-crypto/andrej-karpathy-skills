@@ -63,3 +63,49 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
+
+---
+
+# Repository Guide (for AI assistants working *in* this repo)
+
+> The section above (the four principles) is the **product** this repository ships. The notes below are about maintaining the repo itself — they are not part of the distributed guidelines.
+
+## What this repository is
+
+A **content-distribution repo**, not an application. There is no source code, build step, test suite, or dependency manifest. It packages a single set of Karpathy-inspired behavioral guidelines ([source post](https://x.com/karpathy/status/2015883857489522876)) and ships the *same content* through four delivery channels.
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `CLAUDE.md` | Root instruction file. Users `curl`/copy it into their own projects. **This file is itself the product** — its four principles are the canonical text. |
+| `skills/karpathy-guidelines/SKILL.md` | Agent Skill body. Has YAML frontmatter (`name`, `description`, `license`) plus the four principles. Used by the Claude Code plugin and as a standalone skill. |
+| `.cursor/rules/karpathy-guidelines.mdc` | Cursor project rule. YAML frontmatter (`description`, `alwaysApply: true`) plus the four principles. |
+| `.claude-plugin/plugin.json` | Plugin manifest. `skills` array points at `./skills/karpathy-guidelines`. |
+| `.claude-plugin/marketplace.json` | Marketplace manifest (`id: karpathy-skills`) that publishes the plugin. |
+| `README.md` / `README.zh.md` | English / Simplified-Chinese docs. Must stay in sync with each other. |
+| `CURSOR.md` | Cursor setup instructions and the contributor sync note. |
+| `EXAMPLES.md` | Before/after examples illustrating the four principles. |
+
+## The core invariant: keep the four copies in sync
+
+The four principles exist verbatim (modulo each file's frontmatter/wrapper) in **four places**:
+
+1. `CLAUDE.md`
+2. `skills/karpathy-guidelines/SKILL.md`
+3. `.cursor/rules/karpathy-guidelines.mdc`
+4. (described in) `README.md` + `README.zh.md`
+
+**When you change a principle, update all of them in the same change.** A drift between these files is the most common bug in this repo. After editing, diff the principle text across the three machine-read files to confirm they match.
+
+## Conventions
+
+- **Markdown only.** No code to lint or test. "Verification" here means: principle text is identical across files, links resolve, and any JSON manifest is valid (`plugin.json`, `marketplace.json`).
+- **Bilingual docs.** Any change to `README.md` should be mirrored in `README.zh.md` (and vice versa). Recent history shows these are explicitly synced (e.g. the Cursor section).
+- **Frontmatter matters.** `SKILL.md` needs its `name`/`description`/`license` block; the `.mdc` rule needs `description` + `alwaysApply: true`. Don't drop frontmatter when copying principle text between files.
+- **Version bumps.** `plugin.json` and `marketplace.json` both carry `version: 1.0.0`. Bump them together when releasing.
+- Follow the repo's own four principles when editing: surgical changes, no speculative additions, surface tradeoffs.
+
+## Workflow
+
+This repo has no CI, build, or test commands. Development is: edit Markdown/JSON → keep the four channels in sync → commit → open a PR. Changes are validated by review, not automation.
